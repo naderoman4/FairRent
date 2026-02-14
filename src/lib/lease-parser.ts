@@ -22,7 +22,7 @@ For "data", return an object with the following fields (use null for fields you 
 
 For "confidence", return an object with the same field names, each with a number 0-1 indicating your confidence in the extracted value.
 
-Return ONLY valid JSON, no markdown fences, no explanation.`;
+IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no backticks, no explanation, no text before or after the JSON.`;
 
 interface ParseResult {
   data: Partial<LeaseData>;
@@ -59,12 +59,32 @@ export async function parseLeaseWithClaude(text: string): Promise<ParseResult> {
   }
 
   try {
-    const parsed: ParseResult = JSON.parse(content.text);
+    // Strip markdown fences if present (```json ... ```)
+    let jsonText = content.text.trim();
+    const fenceMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) {
+      jsonText = fenceMatch[1].trim();
+    }
+
+    const parsed: ParseResult = JSON.parse(jsonText);
     return {
       data: parsed.data || {},
       confidence: parsed.confidence || {},
     };
   } catch {
-    throw new Error('Failed to parse AI response as JSON.');
+    // Last resort: try to find any JSON object in the response
+    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const parsed: ParseResult = JSON.parse(jsonMatch[0]);
+        return {
+          data: parsed.data || {},
+          confidence: parsed.confidence || {},
+        };
+      } catch {
+        // fall through
+      }
+    }
+    throw new Error('Impossible d\'analyser la réponse. Veuillez remplir le formulaire manuellement.');
   }
 }
