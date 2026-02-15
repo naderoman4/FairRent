@@ -1,0 +1,36 @@
+# FairRent
+
+> Vérificateur gratuit d'encadrement des loyers à Paris. Outil en ligne permettant aux locataires de vérifier si leur loyer respecte les plafonds légaux.
+
+FairRent est un outil web gratuit qui permet aux locataires parisiens de vérifier la conformité de leur loyer avec l'encadrement des loyers en vigueur à Paris.
+
+## Fonctionnalités
+
+- Vérification rapide du loyer : entrez votre adresse, surface et loyer pour savoir instantanément si votre loyer dépasse le plafond légal.
+- Analyse complète du bail : importez votre bail PDF, remplissez un formulaire ou collez le texte pour une vérification détaillée.
+- Détection des clauses abusives : analyse automatique des clauses illégales (pénalités de retard, prélèvement automatique obligatoire, etc.).
+- Vérification de la validité du bail : durée, type de bail, dépôt de garantie, frais d'agence.
+- Rapport de conformité : rapport détaillé avec les démarches à suivre en cas de non-conformité.
+
+## Données
+
+Les plafonds de loyer proviennent des données officielles de la Mairie de Paris (opendata.paris.fr). L'outil couvre les 80 quartiers parisiens avec les 4 époques de construction et les catégories meublé/non meublé.
+
+## URL
+
+https://fair-rent-seven.vercel.app
+
+## Guides
+
+- [Encadrement des loyers à Paris](https://fair-rent-seven.vercel.app/guides/encadrement-loyers-paris)
+- [Comment vérifier son loyer](https://fair-rent-seven.vercel.app/guides/verifier-loyer-paris)
+- [Complément de loyer](https://fair-rent-seven.vercel.app/guides/complement-de-loyer)
+- [Clauses abusives dans un bail](https://fair-rent-seven.vercel.app/guides/clauses-abusives-bail)
+- [DPE et location](https://fair-rent-seven.vercel.app/guides/dpe-location)
+- [Droits du locataire à Paris](https://fair-rent-seven.vercel.app/guides/droits-locataire-paris)
+- [Surface habitable et bail](https://fair-rent-seven.vercel.app/guides/surface-habitable-bail)
+- [Dépôt de garantie](https://fair-rent-seven.vercel.app/guides/depot-de-garantie)
+
+## Contact
+
+Projet open-source : https://github.com/naderoman4/FairRent

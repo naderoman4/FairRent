@@ -1,0 +1,111 @@
+# FairRent — Documentation complète
+
+> Vérificateur gratuit d'encadrement des loyers à Paris.
+
+## Présentation
+
+FairRent est un outil web gratuit qui permet aux locataires parisiens de vérifier si leur loyer respecte l'encadrement des loyers. L'outil compare le loyer aux plafonds officiels de la Mairie de Paris, détecte les clauses abusives dans le bail, et vérifie la conformité du dépôt de garantie, des frais d'agence, de la durée du bail et du DPE.
+
+URL : https://fair-rent-seven.vercel.app
+
+## Comment ça marche
+
+### 1. Vérification rapide
+L'utilisateur entre son adresse à Paris, le nombre de pièces, l'époque de construction, le type (meublé/non meublé), le loyer hors charges et la surface. L'outil compare instantanément le loyer au plafond légal du quartier.
+
+### 2. Analyse complète
+Trois modes d'entrée :
+- **Import PDF** : glisser-déposer le bail PDF pour extraction automatique des données et analyse des clauses
+- **Saisie manuelle** : formulaire en 4 étapes (logement, finances, bail, clauses optionnelles)
+- **Copier-coller** : coller le texte du bail pour extraction et analyse automatiques
+
+### 3. Rapport de conformité
+L'outil génère un rapport détaillé avec :
+- Verdict global (conforme / avertissement / violation)
+- Comparaison loyer vs plafond (€/m²)
+- Issues détectées par catégorie (loyer, validité du bail, finances, clauses, décence)
+- Sévérité de chaque problème (illégal, signalement, attention, ok)
+- Démarches recommandées (mise en demeure, CDC, tribunal, ADIL 75)
+
+## Vérifications effectuées
+
+### Encadrement du loyer
+- Loyer hors charges vs loyer de référence majoré (plafond)
+- Complément de loyer : justification requise, interdit pour DPE F/G depuis août 2022
+- Mentions obligatoires (loyer de référence et loyer de référence majoré)
+
+### Validité du bail
+- Durée minimale : 3 ans (non meublé), 1 an (meublé), 1-10 mois (bail mobilité)
+- Type de bail : code civil interdit pour résidence principale
+- SCI : durée minimale de 6 ans
+
+### Aspects financiers
+- Dépôt de garantie : max 1 mois (non meublé), max 2 mois (meublé)
+- Frais d'agence : plafond de 15 €/m² (12 €/m² + 3 €/m² état des lieux)
+
+### Clauses du bail (analyse IA)
+- Prélèvement automatique obligatoire → illégal (Art. 4 loi 1989)
+- Pénalités de retard → illégal
+- Interdiction d'héberger famille/amis → illégal
+- Interdiction d'activités politiques/syndicales/religieuses → illégal
+- Résiliation du bail à la discrétion du bailleur → illégal
+- Assurance imposée par le bailleur → illégal
+- Facturation des quittances → illégal (Art. 21 loi 1989)
+- Transfert des grosses réparations au locataire → illégal (Art. 606 CC)
+- Interdiction générale des animaux → signalement
+- Restriction des modifications mineures → signalement
+- Absence de diagnostics → signalement
+- Clause de révision non liée à l'IRL → signalement
+
+### Décence du logement
+- DPE classe G interdit depuis janvier 2025 (loi Climat et Résilience)
+- DPE classe F : loyer gelé depuis août 2022, interdit à partir de 2028
+- Surface minimale : 9 m² (décret du 30 janvier 2002)
+
+## Données utilisées
+
+- **Plafonds de loyer** : API Open Data Paris (opendata.paris.fr) — 2 560 enregistrements par année couvrant 80 quartiers × 4 époques × 4 catégories de pièces × 2 types (meublé/non meublé)
+- **Quartiers** : GeoJSON des 80 quartiers administratifs de Paris avec géolocalisation par point-in-polygon (Turf.js)
+- **Géocodage** : API Adresse du gouvernement (api-adresse.data.gouv.fr)
+
+## Cadre juridique
+
+- Loi n° 89-462 du 6 juillet 1989 (loi Mermaz-Malandain)
+- Loi ALUR du 24 mars 2014 (encadrement des loyers)
+- Loi ELAN du 23 novembre 2018 (expérimentation encadrement)
+- Loi Climat et Résilience du 22 août 2021 (interdiction passoires thermiques)
+- Loi 3DS du 21 février 2022 (pérennisation encadrement)
+- Décret n° 2002-120 du 30 janvier 2002 (décence)
+
+## Guides disponibles
+
+1. **Encadrement des loyers à Paris** — Historique, fonctionnement, plafonds, sanctions
+   URL : /guides/encadrement-loyers-paris
+
+2. **Comment vérifier son loyer** — Guide pas à pas pour vérifier la conformité
+   URL : /guides/verifier-loyer-paris
+
+3. **Complément de loyer** — Conditions, justification, contestation (délai 3 mois)
+   URL : /guides/complement-de-loyer
+
+4. **Clauses abusives** — Art. 4 loi 1989, clauses réputées non écrites, recours
+   URL : /guides/clauses-abusives-bail
+
+5. **DPE et location** — Classes A-G, calendrier d'interdiction, gel des loyers
+   URL : /guides/dpe-location
+
+6. **Droits du locataire** — Loi 1989, bail, congé, charges, recours
+   URL : /guides/droits-locataire-paris
+
+7. **Surface habitable** — Loi Boutin, 9 m² minimum, recours si écart > 1/20e
+   URL : /guides/surface-habitable-bail
+
+8. **Dépôt de garantie** — Montant, délais de restitution, pénalités de retard
+   URL : /guides/depot-de-garantie
+
+## Confidentialité
+
+- Aucune donnée conservée après l'analyse
+- Aucun compte utilisateur requis
+- Aucun cookie (uniquement Vercel Analytics anonymisé)
+- Les fichiers PDF sont traités en mémoire et jamais stockés
