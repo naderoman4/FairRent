@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Scale, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function JoinPage() {
+function JoinContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
@@ -19,7 +19,6 @@ export default function JoinPage() {
     if (loading) return;
 
     if (!user) {
-      // Redirect to signup with return URL
       router.push(`/signup?redirect=/join?team=${teamId}`);
       return;
     }
@@ -30,7 +29,6 @@ export default function JoinPage() {
       return;
     }
 
-    // Accept invite (simplified — actual invite acceptance would go through the API)
     setStatus('success');
     router.push('/dashboard');
   }, [user, loading, teamId, router]);
@@ -58,5 +56,21 @@ export default function JoinPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={
+      <div className="text-center space-y-6">
+        <div className="inline-flex items-center gap-2">
+          <Scale className="h-8 w-8 text-primary" />
+          <span className="font-bold text-2xl text-gray-900">FairRent</span>
+        </div>
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+      </div>
+    }>
+      <JoinContent />
+    </Suspense>
   );
 }
