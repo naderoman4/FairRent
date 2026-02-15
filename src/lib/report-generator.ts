@@ -1,11 +1,20 @@
-import type { LeaseData, ComplianceReport, Verdict, Quartier, RentReference } from './types';
+import type { LeaseData, ComplianceReport, ComplianceIssue, Verdict, Quartier } from './types';
 import { geocodeAddress } from './geocoding';
 import { findQuartier } from './quartier-lookup';
 import { fetchRentReference, determineReferenceYear } from './paris-opendata';
 import { runAllChecks } from './compliance';
 import { getActionSteps } from './constants';
 
-export async function generateReport(leaseData: LeaseData): Promise<ComplianceReport> {
+function determineVerdict(issues: ComplianceIssue[]): Verdict {
+  if (issues.some((i) => i.severity === 'illegal')) return 'violation';
+  if (issues.some((i) => i.severity === 'red_flag' || i.severity === 'attention')) return 'warning';
+  return 'compliant';
+}
+
+export async function generateReport(
+  leaseData: LeaseData,
+  clauseIssues?: ComplianceIssue[]
+): Promise<ComplianceReport> {
   // 1. Geocode address
   const fullAddress = `${leaseData.address}, ${leaseData.postalCode} ${leaseData.city}`;
   const geo = await geocodeAddress(fullAddress);
@@ -36,25 +45,25 @@ export async function generateReport(leaseData: LeaseData): Promise<ComplianceRe
     zoneId: rentReference.zoneId,
   };
 
-  // 5. Run compliance checks
+  // 5. Run rule-based compliance checks
   const issues = runAllChecks(leaseData, rentReference);
 
-  // 6. Determine verdict
-  let verdict: Verdict = 'compliant';
-  if (issues.some((i) => i.severity === 'error')) {
-    verdict = 'violation';
-  } else if (issues.some((i) => i.severity === 'warning')) {
-    verdict = 'warning';
+  // 6. Merge LLM clause analysis issues if provided
+  if (clauseIssues && clauseIssues.length > 0) {
+    issues.push(...clauseIssues);
   }
 
-  // 7. Compute values
+  // 7. Determine verdict
+  const verdict = determineVerdict(issues);
+
+  // 8. Compute values
   const rentPerSqm = leaseData.rentExcludingCharges / leaseData.surface;
   const maxLegalRentPerSqm = rentReference.maxRent;
   const maxLegalRentTotal = maxLegalRentPerSqm * leaseData.surface;
   const overchargePerSqm = rentPerSqm > maxLegalRentPerSqm ? rentPerSqm - maxLegalRentPerSqm : null;
   const overchargeTotal = overchargePerSqm ? overchargePerSqm * leaseData.surface : null;
 
-  // 8. Get action steps if needed
+  // 9. Get action steps if needed
   const hasComplementLoyer = (leaseData.complementLoyer ?? 0) > 0;
   const actions = verdict !== 'compliant' ? getActionSteps(hasComplementLoyer) : [];
 

@@ -1,9 +1,10 @@
-import type { Verdict as VerdictType } from '@/lib/types';
+import type { Verdict as VerdictType, ComplianceIssue } from '@/lib/types';
 import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 
 interface VerdictProps {
   verdict: VerdictType;
   overchargeTotal: number | null;
+  issues?: ComplianceIssue[];
 }
 
 const verdictConfig: Record<VerdictType, {
@@ -15,7 +16,7 @@ const verdictConfig: Record<VerdictType, {
 }> = {
   compliant: {
     icon: CheckCircle,
-    label: 'Conforme',
+    label: 'Bail conforme',
     bgClass: 'bg-green-50 border-green-200',
     textClass: 'text-green-800',
     iconClass: 'text-green-600',
@@ -29,16 +30,20 @@ const verdictConfig: Record<VerdictType, {
   },
   violation: {
     icon: XCircle,
-    label: 'Dépassement du loyer',
+    label: 'Problèmes détectés',
     bgClass: 'bg-red-50 border-red-200',
     textClass: 'text-red-800',
     iconClass: 'text-red-600',
   },
 };
 
-export function Verdict({ verdict, overchargeTotal }: VerdictProps) {
+export function Verdict({ verdict, overchargeTotal, issues }: VerdictProps) {
   const config = verdictConfig[verdict];
   const Icon = config.icon;
+
+  const illegalCount = issues?.filter(i => i.severity === 'illegal').length ?? 0;
+  const redFlagCount = issues?.filter(i => i.severity === 'red_flag').length ?? 0;
+  const attentionCount = issues?.filter(i => i.severity === 'attention').length ?? 0;
 
   return (
     <div className={`rounded-xl border-2 p-6 ${config.bgClass}`}>
@@ -50,6 +55,19 @@ export function Verdict({ verdict, overchargeTotal }: VerdictProps) {
         <p className={`text-center mt-2 text-lg ${config.textClass}`}>
           Trop-perçu estimé : <strong>{overchargeTotal.toFixed(2)} €/mois</strong>
         </p>
+      )}
+      {issues && issues.length > 0 && (
+        <div className="flex justify-center gap-4 mt-3 text-sm">
+          {illegalCount > 0 && (
+            <span className="text-red-600 font-medium">{illegalCount} illégal{illegalCount > 1 ? 's' : ''}</span>
+          )}
+          {redFlagCount > 0 && (
+            <span className="text-orange-600 font-medium">{redFlagCount} signalement{redFlagCount > 1 ? 's' : ''}</span>
+          )}
+          {attentionCount > 0 && (
+            <span className="text-amber-600 font-medium">{attentionCount} attention{attentionCount > 1 ? 's' : ''}</span>
+          )}
+        </div>
       )}
     </div>
   );

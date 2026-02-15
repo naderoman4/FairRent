@@ -2,12 +2,12 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { Upload, FileText } from 'lucide-react';
-import type { LeaseData } from '@/lib/types';
+import type { LeaseData, ComplianceIssue } from '@/lib/types';
 import { MAX_PDF_SIZE_BYTES } from '@/lib/constants';
 
 interface LeaseUploadProps {
   onProgress: (step: string) => void;
-  onComplete: (data: Partial<LeaseData>, confidence: Record<string, number>) => void;
+  onComplete: (data: Partial<LeaseData>, confidence: Record<string, number>, clauseIssues?: ComplianceIssue[]) => void;
   onError: (message: string) => void;
 }
 
@@ -61,10 +61,10 @@ export function LeaseUpload({ onProgress, onComplete, onError }: LeaseUploadProp
             if (!trimmed) continue;
             try {
               const event = JSON.parse(trimmed);
-              if (event.step === 'extracting' || event.step === 'parsing') {
+              if (event.step === 'extracting' || event.step === 'parsing' || event.step === 'analyzing') {
                 onProgress(event.step);
               } else if (event.step === 'done' && event.data) {
-                onComplete(event.data, event.confidence || {});
+                onComplete(event.data, event.confidence || {}, event.clauseIssues);
                 return;
               } else if (event.error) {
                 onError(event.error);
@@ -81,7 +81,7 @@ export function LeaseUpload({ onProgress, onComplete, onError }: LeaseUploadProp
           try {
             const event = JSON.parse(buffer.trim());
             if (event.step === 'done' && event.data) {
-              onComplete(event.data, event.confidence || {});
+              onComplete(event.data, event.confidence || {}, event.clauseIssues);
               return;
             } else if (event.error) {
               onError(event.error);

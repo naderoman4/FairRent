@@ -15,6 +15,11 @@ export interface LeaseData {
   mentionsReferenceRent: boolean | null;
   mentionsMaxRent: boolean | null;
   dpeClass: DPEClass | null;
+  depositAmount: number | null;
+  agencyFees: number | null;
+  leaseType: LeaseType | null;
+  leaseDuration: number | null;
+  clauseText: string | null;
 }
 
 export type ConstructionPeriod =
@@ -24,6 +29,8 @@ export type ConstructionPeriod =
   | 'Apres 1990';
 
 export type DPEClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+
+export type LeaseType = 'loi_1989' | 'mobilite' | 'code_civil' | 'other';
 
 // ─── Rent Reference (from Paris Open Data) ───
 export interface RentReference {
@@ -61,13 +68,19 @@ export interface Quartier {
 // ─── Compliance Report ───
 export type Verdict = 'compliant' | 'warning' | 'violation';
 
+export type IssueSeverity = 'illegal' | 'red_flag' | 'attention' | 'ok';
+
+export type IssueCategory = 'rent' | 'lease_validity' | 'financial' | 'clauses' | 'decency';
+
 export interface ComplianceIssue {
   id: string;
-  severity: 'info' | 'warning' | 'error';
+  severity: IssueSeverity;
+  category: IssueCategory;
   title: string;
   description: string;
   legalReference: string;
   legalUrl?: string;
+  recommendation?: string;
 }
 
 export interface ComplianceReport {
@@ -92,6 +105,12 @@ export interface ActionStep {
   description: string;
   url?: string;
   deadline?: string;
+}
+
+// ─── Clause Analysis ───
+export interface ClauseAnalysisResult {
+  issues: ComplianceIssue[];
+  rawAnalysis: string;
 }
 
 // ─── City Adapter Interface (for future multi-city) ───
@@ -120,11 +139,13 @@ export interface ParseLeaseResponse {
   data?: Partial<LeaseData>;
   rawText?: string;
   confidence: Record<string, number>;
+  clauseIssues?: ComplianceIssue[];
   error?: string;
 }
 
 export interface CheckRentRequest {
   leaseData: LeaseData;
+  clauseIssues?: ComplianceIssue[];
 }
 
 export interface CheckRentResponse {

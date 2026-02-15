@@ -1,4 +1,4 @@
-import type { ConstructionPeriod, DPEClass, ActionStep } from './types';
+import type { ConstructionPeriod, DPEClass, ActionStep, LeaseType } from './types';
 
 // ─── Construction Periods ───
 export const CONSTRUCTION_PERIODS: ConstructionPeriod[] = [
@@ -13,6 +13,14 @@ export const ROOM_CATEGORIES = [1, 2, 3, 4]; // 4 means "4 and more"
 
 // ─── DPE Classes ───
 export const DPE_CLASSES: DPEClass[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+// ─── Lease Types ───
+export const LEASE_TYPES: { value: LeaseType; label: string }[] = [
+  { value: 'loi_1989', label: 'Bail loi du 6 juillet 1989' },
+  { value: 'mobilite', label: 'Bail mobilité' },
+  { value: 'code_civil', label: 'Bail code civil' },
+  { value: 'other', label: 'Autre' },
+];
 
 // ─── Paris Open Data ───
 export const PARIS_OPENDATA_RENT_URL =
@@ -34,6 +42,9 @@ export const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 export const MAX_PDF_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 export const MIN_TEXT_LENGTH_FOR_OCR = 100;
 
+// ─── Clause text limits ───
+export const MAX_CLAUSE_TEXT_LENGTH = 15000;
+
 // ─── Earliest available rent reference year ───
 export const EARLIEST_REFERENCE_YEAR = 2019;
 
@@ -49,6 +60,22 @@ export const SUSPICIOUS_RENT_MULTIPLIER = 3;
 export const COMPLEMENT_LOYER_DPE_BAN_DATE = '2022-08-18';
 export const DPE_G_BAN_DATE = '2025-01-01';
 export const DPE_F_BAN_DATE = '2028-01-01';
+export const DPE_RENT_FREEZE_DATE = '2022-08-24';
+
+// ─── Deposit limits ───
+export const DEPOSIT_MAX_MONTHS_UNFURNISHED = 1;
+export const DEPOSIT_MAX_MONTHS_FURNISHED = 2;
+
+// ─── Agency fees ceiling in Paris (€/m²) ───
+export const AGENCY_FEES_CEILING_PER_SQM = 12;
+export const AGENCY_FEES_ETAT_DES_LIEUX_PER_SQM = 3;
+
+// ─── Lease duration minimums (months) ───
+export const MIN_LEASE_DURATION_UNFURNISHED = 36;
+export const MIN_LEASE_DURATION_FURNISHED = 12;
+export const MIN_LEASE_DURATION_MOBILITE_MIN = 1;
+export const MIN_LEASE_DURATION_MOBILITE_MAX = 10;
+export const MIN_LEASE_DURATION_SCI = 72;
 
 // ─── Action steps for violations/warnings ───
 export function getActionSteps(hasComplementLoyer: boolean): ActionStep[] {

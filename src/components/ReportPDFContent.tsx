@@ -106,7 +106,7 @@ function ReportDocument({ report }: { report: ComplianceReport }) {
             {report.issues.map((issue, i) => (
               <View key={i} style={styles.issue}>
                 <Text style={styles.issueTitle}>
-                  {issue.severity === 'error' ? '● ' : issue.severity === 'warning' ? '▲ ' : 'ℹ '}
+                  {issue.severity === 'illegal' ? '● ' : issue.severity === 'red_flag' ? '▲ ' : issue.severity === 'attention' ? '◆ ' : '✓ '}
                   {issue.title}
                 </Text>
                 <Text style={styles.issueDesc}>{issue.description}</Text>

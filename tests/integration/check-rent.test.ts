@@ -23,6 +23,11 @@ function makeLeaseData(overrides: Partial<LeaseData> = {}): LeaseData {
     mentionsReferenceRent: true,
     mentionsMaxRent: true,
     dpeClass: 'D',
+    depositAmount: null,
+    agencyFees: null,
+    leaseType: null,
+    leaseDuration: null,
+    clauseText: null,
     ...overrides,
   };
 }

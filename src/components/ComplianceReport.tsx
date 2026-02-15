@@ -17,10 +17,14 @@ interface ComplianceReportProps {
 export function ComplianceReport({ report, onReset }: ComplianceReportProps) {
   return (
     <div className="space-y-6">
-      <Verdict verdict={report.verdict} overchargeTotal={report.overchargeTotal} />
+      <Verdict
+        verdict={report.verdict}
+        overchargeTotal={report.overchargeTotal}
+        issues={report.issues}
+      />
       <RentComparison report={report} />
       <IssuesList issues={report.issues} />
-      <ActionSteps actions={report.actions} />
+      {report.actions.length > 0 && <ActionSteps actions={report.actions} />}
 
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
         <ReportPDFDownload report={report} />

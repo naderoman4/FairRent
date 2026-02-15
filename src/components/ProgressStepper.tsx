@@ -1,4 +1,4 @@
-import { FileText, Search, CheckCircle } from 'lucide-react';
+import { FileText, Search, CheckCircle, Shield } from 'lucide-react';
 
 interface ProgressStepperProps {
   currentStep: string;
@@ -6,7 +6,7 @@ interface ProgressStepperProps {
 
 const steps = [
   { id: 'extracting', label: 'Lecture du PDF...', icon: FileText },
-  { id: 'parsing', label: 'Analyse du bail...', icon: Search },
+  { id: 'analyzing', label: 'Analyse du bail et des clauses...', icon: Search },
   { id: 'done', label: 'Terminé', icon: CheckCircle },
 ];
 

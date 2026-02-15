@@ -13,7 +13,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CheckRent
       );
     }
 
-    const { leaseData } = body;
+    const { leaseData, clauseIssues } = body;
 
     // Basic validation
     if (!leaseData.address || !leaseData.postalCode) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CheckRent
       );
     }
 
-    const report = await generateReport(leaseData);
+    const report = await generateReport(leaseData, clauseIssues);
 
     return NextResponse.json({ success: true, report });
   } catch (error) {

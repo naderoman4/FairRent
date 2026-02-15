@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { LeaseData, ConstructionPeriod, DPEClass } from '@/lib/types';
-import { CONSTRUCTION_PERIODS, DPE_CLASSES } from '@/lib/constants';
+import type { LeaseData, ConstructionPeriod, DPEClass, LeaseType } from '@/lib/types';
+import { CONSTRUCTION_PERIODS, DPE_CLASSES, LEASE_TYPES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,10 @@ export function LeaseForm({ initialData, confidence, onSubmit, onBack }: LeaseFo
     mentionsReferenceRent: initialData?.mentionsReferenceRent ?? null,
     mentionsMaxRent: initialData?.mentionsMaxRent ?? null,
     dpeClass: initialData?.dpeClass ?? ('' as string),
+    depositAmount: initialData?.depositAmount?.toString() ?? '',
+    agencyFees: initialData?.agencyFees?.toString() ?? '',
+    leaseType: initialData?.leaseType ?? ('' as string),
+    leaseDuration: initialData?.leaseDuration?.toString() ?? '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -88,6 +92,11 @@ export function LeaseForm({ initialData, confidence, onSubmit, onBack }: LeaseFo
       mentionsReferenceRent: form.mentionsReferenceRent,
       mentionsMaxRent: form.mentionsMaxRent,
       dpeClass: form.dpeClass ? (form.dpeClass as DPEClass) : null,
+      depositAmount: form.depositAmount ? parseFloat(form.depositAmount) : null,
+      agencyFees: form.agencyFees ? parseFloat(form.agencyFees) : null,
+      leaseType: form.leaseType ? (form.leaseType as LeaseType) : null,
+      leaseDuration: form.leaseDuration ? parseInt(form.leaseDuration, 10) : null,
+      clauseText: null,
     };
 
     onSubmit(data);
@@ -229,16 +238,45 @@ export function LeaseForm({ initialData, confidence, onSubmit, onBack }: LeaseFo
           <CardTitle className="text-lg">Le bail</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="leaseStartDate">Date de début du bail</Label>
+              <Input
+                id="leaseStartDate"
+                type="date"
+                value={form.leaseStartDate}
+                onChange={(e) => updateField('leaseStartDate', e.target.value)}
+                className={fieldClass('leaseStartDate')}
+              />
+              {errors.leaseStartDate && <p className="text-red-500 text-xs mt-1">{errors.leaseStartDate}</p>}
+            </div>
+            <div>
+              <Label htmlFor="leaseDuration">Durée du bail (mois)</Label>
+              <Input
+                id="leaseDuration"
+                type="number"
+                min="1"
+                value={form.leaseDuration}
+                onChange={(e) => updateField('leaseDuration', e.target.value)}
+                placeholder="36"
+                className={fieldClass('leaseDuration')}
+              />
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="leaseStartDate">Date de début du bail</Label>
-            <Input
-              id="leaseStartDate"
-              type="date"
-              value={form.leaseStartDate}
-              onChange={(e) => updateField('leaseStartDate', e.target.value)}
-              className={fieldClass('leaseStartDate')}
-            />
-            {errors.leaseStartDate && <p className="text-red-500 text-xs mt-1">{errors.leaseStartDate}</p>}
+            <Label htmlFor="leaseType">Type de bail</Label>
+            <Select
+              id="leaseType"
+              value={form.leaseType}
+              onChange={(e) => updateField('leaseType', e.target.value)}
+              className={fieldClass('leaseType')}
+            >
+              <option value="">Non renseigné</option>
+              {LEASE_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -267,6 +305,35 @@ export function LeaseForm({ initialData, confidence, onSubmit, onBack }: LeaseFo
                 onChange={(e) => updateField('charges', e.target.value)}
                 placeholder="50"
                 className={fieldClass('charges')}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="depositAmount">Dépôt de garantie (€)</Label>
+              <Input
+                id="depositAmount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.depositAmount}
+                onChange={(e) => updateField('depositAmount', e.target.value)}
+                placeholder="850"
+                className={fieldClass('depositAmount')}
+              />
+            </div>
+            <div>
+              <Label htmlFor="agencyFees">Honoraires d&apos;agence locataire (€)</Label>
+              <Input
+                id="agencyFees"
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.agencyFees}
+                onChange={(e) => updateField('agencyFees', e.target.value)}
+                placeholder="0"
+                className={fieldClass('agencyFees')}
               />
             </div>
           </div>

@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { LeaseData } from './types';
+import type { LeaseData, ComplianceIssue } from './types';
+import { CLAUSE_ANALYSIS_PROMPT } from './prompts/clause-analysis';
 
-const SYSTEM_PROMPT = `You are a French lease document analyzer. Extract the following fields from the lease text. Return a JSON object with two keys: "data" and "confidence".
+const EXTRACTION_PROMPT = `You are a French lease document analyzer. Extract the following fields from the lease text. Return a JSON object with two keys: "data" and "confidence".
 
 For "data", return an object with the following fields (use null for fields you cannot find):
 - address (full address of the rented property)
@@ -19,6 +20,10 @@ For "data", return an object with the following fields (use null for fields you 
 - mentionsReferenceRent (boolean: does the lease text mention "loyer de référence"?)
 - mentionsMaxRent (boolean: does the lease text mention "loyer de référence majoré"?)
 - dpeClass (DPE energy class A-G if mentioned, null otherwise)
+- depositAmount (dépôt de garantie in euros, as a number, null if not mentioned)
+- agencyFees (honoraires à la charge du locataire in euros, as a number, null if not mentioned)
+- leaseType (one of: "loi_1989", "mobilite", "code_civil", "other", or null)
+- leaseDuration (durée du bail in months, as a number, null if not mentioned)
 
 For "confidence", return an object with the same field names, each with a number 0-1 indicating your confidence in the extracted value.
 
@@ -29,22 +34,42 @@ interface ParseResult {
   confidence: Record<string, number>;
 }
 
-export async function parseLeaseWithClaude(text: string): Promise<ParseResult> {
+function getClient(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error('ANTHROPIC_API_KEY is not configured.');
   }
+  return new Anthropic({ apiKey });
+}
 
-  const client = new Anthropic({ apiKey });
+function parseJsonResponse(text: string): unknown {
+  let jsonText = text.trim();
+  const fenceMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    jsonText = fenceMatch[1].trim();
+  }
 
-  // Truncate text if too long (Claude has context limits)
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    const jsonMatch = text.match(/[\[{][\s\S]*[\]}]/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error('Could not parse JSON response');
+  }
+}
+
+export async function parseLeaseWithClaude(text: string): Promise<ParseResult> {
+  const client = getClient();
+
   const maxChars = 80000;
   const truncatedText = text.length > maxChars ? text.slice(0, maxChars) : text;
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 2000,
-    system: SYSTEM_PROMPT,
+    system: EXTRACTION_PROMPT,
     messages: [
       {
         role: 'user',
@@ -59,32 +84,64 @@ export async function parseLeaseWithClaude(text: string): Promise<ParseResult> {
   }
 
   try {
-    // Strip markdown fences if present (```json ... ```)
-    let jsonText = content.text.trim();
-    const fenceMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenceMatch) {
-      jsonText = fenceMatch[1].trim();
-    }
-
-    const parsed: ParseResult = JSON.parse(jsonText);
+    const parsed = parseJsonResponse(content.text) as ParseResult;
     return {
       data: parsed.data || {},
       confidence: parsed.confidence || {},
     };
   } catch {
-    // Last resort: try to find any JSON object in the response
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const parsed: ParseResult = JSON.parse(jsonMatch[0]);
-        return {
-          data: parsed.data || {},
-          confidence: parsed.confidence || {},
-        };
-      } catch {
-        // fall through
-      }
-    }
     throw new Error('Impossible d\'analyser la réponse. Veuillez remplir le formulaire manuellement.');
   }
+}
+
+export async function analyzeClausesWithClaude(text: string): Promise<ComplianceIssue[]> {
+  const client = getClient();
+
+  const maxChars = 80000;
+  const truncatedText = text.length > maxChars ? text.slice(0, maxChars) : text;
+
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 4000,
+    system: CLAUSE_ANALYSIS_PROMPT,
+    messages: [
+      {
+        role: 'user',
+        content: truncatedText,
+      },
+    ],
+  });
+
+  const content = message.content[0];
+  if (content.type !== 'text') {
+    return [];
+  }
+
+  try {
+    const parsed = parseJsonResponse(content.text) as ComplianceIssue[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((issue) => ({
+      ...issue,
+      category: 'clauses' as const,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function parseAndAnalyzeWithClaude(text: string): Promise<{
+  data: Partial<LeaseData>;
+  confidence: Record<string, number>;
+  clauseIssues: ComplianceIssue[];
+}> {
+  const [parseResult, clauseIssues] = await Promise.all([
+    parseLeaseWithClaude(text),
+    analyzeClausesWithClaude(text),
+  ]);
+
+  return {
+    data: parseResult.data,
+    confidence: parseResult.confidence,
+    clauseIssues,
+  };
 }
