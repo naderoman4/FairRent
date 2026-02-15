@@ -17,16 +17,16 @@ export default function ReportPage() {
       try {
         setReport(JSON.parse(stored));
       } catch {
-        router.push('/');
+        router.push('/analyser');
       }
     } else {
-      router.push('/');
+      router.push('/analyser');
     }
   }, [router]);
 
   const handleReset = () => {
     sessionStorage.removeItem('fairrent-report');
-    router.push('/');
+    router.push('/analyser');
   };
 
   if (!report) {

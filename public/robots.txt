@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /lp/
+Disallow: /api/
+
+# Host
+Host: https://fairrent.fr
+
+# Sitemaps
+Sitemap: https://fairrent.fr/sitemap.xml

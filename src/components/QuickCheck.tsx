@@ -19,7 +19,11 @@ interface QuickCheckResult {
   quartierName: string;
 }
 
-export function QuickCheck() {
+interface QuickCheckProps {
+  analysisUrl?: string; // URL for "Analyse complète" button (default: scroll to top)
+}
+
+export function QuickCheck({ analysisUrl }: QuickCheckProps = {}) {
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [rooms, setRooms] = useState('2');
@@ -214,7 +218,11 @@ export function QuickCheck() {
               </Button>
               <Button
                 onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  if (analysisUrl) {
+                    window.location.href = analysisUrl;
+                  } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
                 }}
                 className="flex-1"
               >
